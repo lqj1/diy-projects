@@ -1,0 +1,27 @@
+/**
+ * Storage 二次封装
+ * @author lqj
+ */
+import config from './../config'
+export default {
+  setItem(key, val) {
+    let storage = this.getStorage()
+    storage[key] = val
+    window.localStorage.setItem(config.namespace, JSON.stringify(storage))
+  },
+  getItem(key) {
+    return this.getStorage()[key] // 获取的是属性值
+  },
+  getStorage() {
+    return JSON.parse(window.localStorage.getItem(config.namespace) || '{}')
+  },
+  clearItem(key) {
+    let storage = this.getStorage()
+    delete storage[key]
+    // 删除之后还需要重新写入
+    window.localStorage.setItem(config.namespace, JSON.stringify(storage))
+  },
+  clearAll() {
+    window.localStorage.clear()
+  }
+}
