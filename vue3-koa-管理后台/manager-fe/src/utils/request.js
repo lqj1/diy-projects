@@ -5,6 +5,7 @@ import axios from 'axios'
 import config from './../config'
 import { ElMessage } from 'element-plus'
 import router from './../router'
+import storage from './storage'
 const TOKEN_INVALID = 'Token认证失败，请重新登录'
 const NETWORK_ERROR = '网络请求异常，请稍后再试'
 
@@ -14,19 +15,17 @@ const service = axios.create({
 })
 // 请求拦截
 service.interceptors.request.use(req => {
-  // TODO
-  const header = req.headers
-  if (!headers.Authorization) {
-    headers.Authorization = 'Bear Vincent'
-  }
+  const headers = req.headers
+  const { token = '' } = storage.getItem('userInfo') || {}
+  if (!headers.Authorization) headers.Authorization = 'Bearer ' + token
   return req
 })
-// 响应拦截
-service.interceptors.request.use(res => {
+// 响应拦截，注意是response不是request
+service.interceptors.response.use(res => {
   const { code, data, msg } = res.data
   if (code === 200) {
     return data
-  } else if (code === 40001) {
+  } else if (code === 500001) {
     ElMessage.error(TOKEN_INVALID)
     setTimeout(() => {
       router.push('/login')
@@ -34,7 +33,7 @@ service.interceptors.request.use(res => {
     return Promise.reject(TOKEN_INVALID)
   } else {
     ElMessage.error(msg || NETWORK_ERROR)
-    return Promise.reject(NETWORK_ERROR)
+    return Promise.reject(msg || NETWORK_ERROR)
   }
 })
 /**
@@ -46,11 +45,16 @@ function request(options) {
   if (options.method.toLowerCase() === 'get') {
     options.params = options.data
   }
+  let isMock = config.mock
+  // 默认是全局的mock，但以配置的单个请求的mock为主，
+  if (typeof options.mock != 'undefined') {
+    isMock = options.mock
+  }
   if (config.env === 'prod') {
     // 生产环境，防止请求到mockapi,service.defaults.baseURL是axios默认的配置
     service.defaults.baseURL = config.baseApi
   } else {
-    service.defaults.baseURL = config.mock ? config.mockApi : config.baseApi
+    service.defaults.baseURL = isMock ? config.mockApi : config.baseApi
   }
   return service(options)
 }
@@ -60,7 +64,7 @@ function request(options) {
 // })
 // 因为导出的 request 不是对象，所以要使用上面方法二，需要对 request 进行扩展
 ;['get', 'post', 'put', 'delete', 'patch'].forEach(item => {
-  request[item] = (url, data, option) => {
+  request[item] = (url, data, options) => {
     return request({
       url,
       data,

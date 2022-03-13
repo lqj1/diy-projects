@@ -848,3 +848,25 @@ mongo --port 57017
 #### 4.1 接口文档形式
 
 ##### Swagger、YAPI、EasyMock、MarkDown
+
+### 5. 登录布局开发
+
+- 登录表单居中样式
+
+- ```css
+  .login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9fcff;
+    width: 100vw;
+    height: 100vh;
+    .modal {
+      width: 500px;
+      padding: 50px;
+      background-color: #fff;
+      border-radius: 40px;
+      box-shadow: 0px 0px;
+    }
+  }
+  ```
