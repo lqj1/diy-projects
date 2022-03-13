@@ -1,0 +1,8 @@
+[2022-03-12T21:22:36.913] [ERROR] error - ReferenceError: ctx is not defined
+    at /Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/app.js:33:3
+    at dispatch (/Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/node_modules/koa-compose/index.js:42:32)
+    at views (/Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/node_modules/koa-views/src/index.js:91:12)
+    at dispatch (/Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/node_modules/koa-compose/index.js:42:32)
+    at serve (/Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/node_modules/koa-static/index.js:53:15)
+    at async logger (/Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/node_modules/koa-logger/index.js:67:7)
+    at async bodyParser (/Users/liqinjian/workspace/gitproject/vue3-projects/vue3-koa-管理后台/manager-server/node_modules/koa-bodyparser/index.js:95:5)
