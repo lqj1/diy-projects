@@ -870,3 +870,238 @@ mongo --port 57017
     }
   }
   ```
+
+#### 5.1 登录页面后台开发
+
+- mongoose是MongoDB的上层应用插件
+- 开发步骤
+
+##### a. 创建utils文件夹，并创建消息提示文件log4j.js 和 请求工具文件 utils.js
+
+```javascript
+// log4j.js
+/**
+ * 日志存储
+ * @author lqj
+ */
+const log4js = require('log4js')
+const levels = {
+  trace: log4js.levels.TRACE,
+  debug: log4js.levels.DEBUG,
+  info: log4js.levels.INFO,
+  warn: log4js.levels.WARN,
+  error: log4js.levels.ERROR,
+  fatal: log4js.levels.FATAL
+}
+log4js.configure({
+  appenders: {
+    console: { type: 'console' },
+    info: {
+      type: 'file',
+      filename: 'logs/all-logs.log' // info错误输出到常规的文件
+    },
+    error: {
+      type: 'dateFile',
+      filename: 'logs/log',
+      pattern: 'yyyy-MM-dd.log', // 错误按天输出到文件
+      alwaysIncludePattern: true // 设置文件名称为 filename + pattern
+    }
+  },
+  categories: {
+    default: {
+      appenders: ['console'], // 上线的时候需要把console删除，不让输出到控制台
+      level: 'debug'
+    },
+    info: {
+      appenders: ['info', 'console'],
+      level: 'info'
+    },
+    error: {
+      appenders: ['error', 'console'], // error错误追加到这两种错误级别
+      level: 'error'
+    }
+  }
+})
+/**
+ * 日志输出，level为debug
+ * @param {string} content
+ */
+exports.debug = content => {
+  let logger = log4js.getLogger()
+  logger.level = levels.debug
+  logger.debug(content)
+}
+exports.info = content => {
+  let logger = log4js.getLogger('info')
+  logger.level = levels.info
+  logger.info(content)
+}
+exports.error = content => {
+  let logger = log4js.getLogger('error') // 传入的是 categories 中的名称
+  logger.level = levels.error
+  logger.error(content)
+}
+```
+
+请求工具文件 utils.js
+
+```javascript
+/**
+ * 通用工具函数
+ */
+const log4js = require('./log4j')
+const CODE = {
+  SUCCESS: 200,
+  PARAM_ERROR: 10001, //参数错误
+  USER_ACCONT_ERROR: 20001, // 账号或密码错误
+  USER_LOGIN_ERROR: 30001, // 用户未登录
+  BUSINESS_ERROR: 40001, // 业务请求失败
+  AUTH_ERROR: 50001 // 认证失败或TOKEN过期
+}
+module.exports = {
+  /**
+   * 分页结构封装
+   * @param {number} pageNum
+   * @param {number} pageSize
+   * @returns
+   */
+  pager({ pageNum = 1, pageSize = 10 }) {
+    pageNum *= 1 // 字符串转成数字
+    pageSize *= 1
+    const skipIndex = (pageNum - 1) * pageSize // 下一个索引值
+    return {
+      page: {
+        pageNum,
+        pageSize
+      },
+      skipIndex
+    }
+  },
+  success(data = '', msg = '', code = CODE.SUCCESS) {
+    log4js.debug(data)
+    return {
+      code,
+      data,
+      msg
+    }
+  },
+  fail(msg = '', code = CODE.BUSINESS_ERROR, data = '') {
+    log4js.debug(msg)
+    return {
+      code,
+      data,
+      msg
+    }
+  }
+}
+```
+
+##### b. 创建用户数据模型，创建models文件夹，创建userSchema.js文件
+
+```javascript
+// userSchema.js
+/**
+ * 用户模型
+ */
+const mongoose = require('mongoose')
+const userSchama = mongoose.Schema({
+  userId: Number, //用户ID，自增长
+  userName: String, //用户名称
+  userPwd: String, //用户密码，md5加密
+  userEmail: String, //用户邮箱
+  mobile: String, //手机号
+  sex: Number, //性别 0:男  1：女
+  deptId: [], //部门
+  job: String, //岗位
+  state: {
+    type: Number,
+    default: 1
+  }, // 1: 在职 2: 离职 3: 试用期
+  role: {
+    type: Number,
+    default: 1
+  }, // 用户角色 0：系统管理员  1： 普通用户
+  roleList: [], //系统角色
+  createTime: {
+    type: Date,
+    default: Date.now()
+  }, //创建时间
+  lastLoginTime: {
+    type: Date,
+    default: Date.now()
+  }, //更新时间
+  remark: String
+})
+// 参数1: 定义的模型; 2:配置名称; 3: 关联到数据库的集合的名称
+module.exports = mongoose.model('users', userSchama, 'users')
+```
+
+##### c. 创建用户请求模块的路由，创建routes文件夹，创建users.js文件，通过导入数据模型来查数据
+
+```javascript
+// users.js
+/**
+ * 用户管理模块
+ */
+const router = require('koa-router')()
+// 导入用户模型
+const User = require('./../models/userSchama')
+const util = require('./../utils/utils')
+router.prefix('/users')
+// 路由
+router.post('/login', async ctx => {
+  try {
+    // 通过ctx可以得到请求参数,get通过query,post通过body
+    const { userName, userPwd } = ctx.request.body
+    // 返回的是promise
+    const res = await User.findOne({
+      userName, // key-value的简写
+      userPwd
+    })
+    if (res) {
+      ctx.body = util.success(res)
+    } else {
+      ctx.body = util.fail('账号密码不正确')
+    }
+  } catch (error) {
+    ctx.body = util.fail(error.msg)
+  }
+})
+
+module.exports = router
+```
+
+##### d. 创建config文件夹，存放数据库连接配置文件db.js和index.js
+
+```javascript
+// index.js
+/**
+ * 配置文件
+ */
+module.exports = {
+  URL: 'mongodb://127.0.0.1:27017/imooc-manager'
+}
+```
+
+```javascript
+// db.js
+/**
+ * 数据库连接
+ */
+const { default: mongoose } = require('mongoose')
+const mangoose = require('mongoose')
+const config = require('./index')
+const log4js = require('./../utils/log4j')
+// 数据库链接不需要加引号
+mongoose.connect(config.URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+const db = mongoose.connection
+db.on('error', () => {
+  log4js.error(`****数据库连接失败****${config.URL}`)
+})
+db.on('open', () => {
+  log4js.info('****数据库连接成功****')
+})
+```

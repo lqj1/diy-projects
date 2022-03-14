@@ -7,11 +7,14 @@ const bodyparser = require('koa-bodyparser')
 const logger = require('koa-logger')
 const log4js = require('./utils/log4j')
 
-const index = require('./routes/index')
+// const index = require('./routes/index')
 const users = require('./routes/users')
-
+const router = require('koa-router')()
 // error handler
 onerror(app)
+
+// 加载数据库连接
+require('./config/db')
 
 // middlewares
 app.use(
@@ -39,8 +42,12 @@ app.use(async (ctx, next) => {
 })
 
 // routes
-app.use(index.routes(), index.allowedMethods())
-app.use(users.routes(), users.allowedMethods())
+// 定义前缀，一级路由
+router.prefix('/api')
+router.use(users.routes(), users.allowedMethods())
+app.use(router.routes(), router.allowedMethods())
+// app.use(index.routes(), index.allowedMethods())
+// app.use(users.routes(), users.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {
