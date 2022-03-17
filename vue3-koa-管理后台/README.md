@@ -1105,3 +1105,61 @@ db.on('open', () => {
   log4js.info('****数据库连接成功****')
 })
 ```
+
+#### 5.2 登录页面需要掌握的知识
+
+##### components和views区别
+
+- components通常放业务组件
+- views通常放页面（视图）
+
+##### 路由创建方式
+
+```javascript
+import { createRouter,createWebHashHistory } from  "vue-router"
+const router = createRouter({
+  history:createWebHashHistory(),
+  routes:[]
+})
+```
+
+##### 什么是路由按需？
+
+路由按需指的是页面首次加载的时候只会加载基础包，不包含对应路由代码，当访问对应页面时，才会加载对应文件。
+
+```javascript
+const routes = [
+  name:'home',
+  path:'/home',
+  component:()=>import('home.vue')
+]
+```
+
+##### 怎么理解vw和vh?
+
+vw和vh是css3中的新特性，是一种视口单位。在目前PC/H5中广泛使用，vw主要是可视区域宽度，vh主要是可视区域高度。通过这种视口单位可实现自适应布局。
+
+1vw = 1% 100vw = 屏幕可视宽度 100vh = 屏幕可视高度 calc(100vw - 50px) = 动态计算 屏幕宽度 - 50px ,注意：减号 前后必须有空格。设置后超出会出现滚动条。
+
+##### Vue3全局对象挂载
+
+在Vue2中我们一般通过原型进行挂载，比如：
+
+```javascript
+Vue.prototype.$axios = axios;
+```
+
+Vue3中由于没有vue实例对象，因此我们需要通过另外一种方式：
+
+```javascript
+import App from 'app.vue'
+const app = createApp(App)
+app.config.globalProperties.$axios = axios;
+// 使用 Options API
+login() {
+    this.$axios.get('/login')
+}
+// composition API
+const instance = getCurrentInstance()
+instance.appContext.config.globalProperties.$axios.get('/login')
+```
