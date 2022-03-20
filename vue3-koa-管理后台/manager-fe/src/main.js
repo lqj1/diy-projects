@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+import 'element-plus/lib/theme-chalk/index.css'
 import App from './App.vue'
 import router from './router'
 import axios from 'axios'
@@ -20,4 +20,5 @@ const app = createApp(App)
 app.config.globalProperties.$request = request
 app.config.globalProperties.$api = api
 app.config.globalProperties.$storage = storage
-app.use(router).use(store).use(ElementPlus).mount('#app')
+app.use(ElementPlus)
+app.use(router).use(store).mount('#app')

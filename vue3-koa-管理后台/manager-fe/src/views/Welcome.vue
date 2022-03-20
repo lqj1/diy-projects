@@ -26,6 +26,7 @@ const goLogin = () => {
   justify-content: center;
   align-items: center;
   height: 100%;
+  background: #fff;
   .content {
     position: relative;
     bottom: 40px;

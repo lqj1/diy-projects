@@ -13,7 +13,7 @@
                router
                :collapse="isCollapse"
                class="nav-menu">
-        <tree-menu :userMenu="userMenu" />
+        <TreeMenu :userMenu="userMenu" />
       </el-menu>
     </div>
     <div :class="['content-right', isCollapse ? 'fold' : 'unfold']">
@@ -56,20 +56,55 @@
 </template>
 
 <script>
-// import BreadCrumb from "./BreadCrumb.vue";
+import BreadCrumb from "./BreadCrumb.vue";
+import TreeMenu from "./TreeMenu.vue";
+// import { Bell } from "@element-plus/icons-vue"
 export default {
   name: "Home",
-  components: { TreeMenu, BreadCrumb },
+  components: { BreadCrumb, TreeMenu },
   data () {
     return {
-    };
+      isCollapse: false,
+      userInfo: this.$store.state.userInfo,
+      noticeCount: 3,
+      userMenu: [],
+      activeMenu: location.hash.slice(1)
+    }
   },
   computed: {
   },
   mounted () {
+    this.getNoticeCount()
+    this.getMunuList()
   },
   methods: {
-
+    toggle () {
+      this.isCollapse = !this.isCollapse
+    },
+    handleLogout (key) {
+      if (key == 'email') {
+        return
+      }
+      this.$store.commit('saveUserInfo', '')
+      this.userInfo = null
+      this.$router.push('/login')
+    },
+    async getNoticeCount () {
+      try {
+        const res = await this.$api.noticeCount()
+        this.noticeCount = res;
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    async getMunuList () {
+      try {
+        const list = await this.$api.getMunuList()
+        this.userMenu = list;
+      } catch (error) {
+        console.error(error)
+      }
+    }
   },
 };
 </script>
@@ -135,6 +170,8 @@ export default {
         }
       }
       .user-info {
+        display: flex;
+        align-items: center;
         .notice {
           line-height: 30px;
           margin-right: 15px;

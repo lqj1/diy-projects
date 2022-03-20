@@ -18,7 +18,7 @@ const EnvConfig = {
 }
 export default {
   env,
-  // mock: false, // 接口是否支持mock，整个项目使用mock方式
+  mock: false, // 接口是否支持mock，true整个项目使用mock方式，就不需要使用后台项目的代码了
   // baseApi: 'www.baidu.com/api' // test-www
   namespace: 'manager',
   ...EnvConfig['dev']

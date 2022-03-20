@@ -1,5 +1,15 @@
 [TOC]
 
+### 项目启动
+
+- 本地启动，首先开启mongo服务
+
+        `mongod --config /opt/homebrew/etc/mongod.conf`
+
+- 进入后端项目 manager-server，安装依赖，`npm install`，开启后端服务`npm run dev`
+
+- 进入再开启前端项目 manager-fe，安装依赖，`npm install`，开启后端服务`npm run dev`
+
 ### 1. 项目开发简介
 
 #### 1.1 项目开发流程
@@ -1163,3 +1173,187 @@ login() {
 const instance = getCurrentInstance()
 instance.appContext.config.globalProperties.$axios.get('/login')
 ```
+
+### 6. 前台首页实现
+
+#### 6.1 路由相关
+
+- 子路由如果要复用父路由的路径，就不可以加 /，不然就变成绝对路径了
+
+```javascript
+const routes = [
+  {
+    name: 'home',
+    path: '/',
+    meta: {
+      title: '首页'
+    },
+    component: Home,
+    redirect: '/welcome',
+    children: [
+      {
+        name: 'welcome',
+        path: '/welcome',
+        meta: {
+          title: '欢迎页'
+        },
+        component: () => import('./../views/Welcome.vue')
+      },
+      {
+        name: 'user',
+        path: 'user',
+        meta: {
+          title: '用户管理'
+        },
+        component: () => import('./../views/Welcome.vue'),
+        children: [
+          {
+            name: 'info',
+            path: 'info',
+            meta: {
+              title: '信息统计'
+            },
+            component: () => import('./../views/Welcome.vue')
+          }
+        ]
+      }
+    ]
+  },
+  {
+    name: 'login',
+    path: '/login',
+    meta: {
+      title: '登录'
+    },
+    component: () => import('./../views/Login.vue')
+  }
+]
+```
+
+- `this.$route` 可以打印出路由的所有信息
+
+#### 6.2 vite配置
+
+- vite中组件地址必须带后缀 .vue，而webpack不用
+  
+  ```javascript
+  import('./../views/Welcome.vue')
+  import('./../views/Welcome')  // 错误
+  ```
+
+- vite可以配置别名，解决 ./../ 的问题，类似于 Vue 中的 @
+  
+  ```javascript
+  resolve: {
+      alias: {
+          '@': path.resolve(__dirname, './src')
+      }
+  }
+  ```
+
+- 全局的 mixin 样式问题，可以通过 vite 进行配置
+  
+  ```javascript
+  css: {
+      preprocessorOptions: {
+          scss: {
+              additionalData: `@import '@/assets/style/base.scss'`
+          }
+      }
+  }
+  ```
+
+### 7. JWT(JSON Web Tokens)
+
+#### 7.1 什么是JWT
+
+- JWT是一种跨域认证解决方案
+
+#### 7.2 解决问题
+
+- 数据传输简单、高效
+
+- jwt会生成签名，保证传输安全
+
+- jwt具有时效性
+
+- jwt更高效地利用集群做好单点登录
+
+#### 7.3 原理
+
+- 服务器认证后，生成一个JSON对象，后续通过json进行通信
+
+#### 7.4 数据结构
+
+- Header(头部)、Payload(负载)、Signature(签名)
+
+- JWT TOKEN
+  
+  - Header.Payload.Sigature 组成
+
+- Header 结构
+  
+  ```json
+  "alg": "HS256",  // 加密算法
+  "typ": "JWT"  // 加密类型
+  ```
+
+- Payload结构
+  
+  ```
+  iss(issure): 签发人
+  exp(expiration time): 过期时间
+  sub(subject): 主题
+  aud(audience): 受众
+  nbf(not before): 生效时间
+  iat(issued at): 签发时间
+  jti(jwt id): 编号 
+  
+  // example
+  {
+      "sub": '1111111',
+      "name": 'jql',
+      "admin": true
+  }
+  ```
+
+#### 7.5 jsonwebtoken插件
+
+- 要手动去拼接header、payload、以及使用加密算法生成token需要一定步骤，而插件jsonwebtoken已经帮我们封装好，只需要传入 json，就可以生成一个token。
+
+- 后端项目中
+  
+  - 安装插件 `npm install jsonwebtoken`
+  
+  - 在用户发来的请求处理，routers/users.js 文件中处理
+  
+  ```javascript
+  // 路由
+  router.post('/login', async ctx => {
+    try {
+      // 通过ctx可以得到请求参数,get通过query,post通过body
+      const { userName, userPwd } = ctx.request.body
+      // 返回的是promise
+      const res = await User.findOne({
+        userName, // key-value的简写
+        userPwd
+      })
+      const data = res._doc
+      const token = jwt.sign(
+        {
+          data: data
+        },
+        'lqj',
+        { expiresIn: 30 }
+      ) // 密钥 lqj, 过期时间 30s
+      if (res) {
+        data.token = token
+        ctx.body = util.success(res)
+      } else {
+        ctx.body = util.fail('账号密码不正确')
+      }
+    } catch (error) {
+      ctx.body = util.fail(error.msg)
+    }
+  })
+  ```
