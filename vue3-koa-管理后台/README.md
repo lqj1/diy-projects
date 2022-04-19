@@ -2,9 +2,11 @@
 
 ### 项目启动
 
-- 本地启动，首先开启mongo服务
+- 本地启动，首先开启 mongo 服务
+  - 使用的是类似于 inter 芯片的安装方式，版本 5.0.7
+  - 我的电脑安装地址为 /usr/local/mongodb
 
-        `mongod --config /opt/homebrew/etc/mongod.conf`
+`mongod --config /usr/local/mongodb/etc/mongod.conf`
 
 - 进入后端项目 manager-server，安装依赖，`npm install`，开启后端服务`npm run dev`
 
@@ -105,16 +107,16 @@ a. 模板语法未变
   
   - .lazy、number、trim
 
-#### 1.6 Composition API使用
+#### 1.6 Composition API 使用
 
-##### a. 定义setup启动函数
+##### a. 定义 setup 启动函数
 
 ```javascript
 export default {
-    name: 'app',
-    setup() {
-        // 启动函数
-    }
+  name: 'app',
+  setup() {
+    // 启动函数
+  }
 }
 ```
 
@@ -127,7 +129,7 @@ setup(){
     // 对象类型
     let user = reactive({name: 'jack'})
     return {
-        age, 
+        age,
         user
     }
 }
@@ -162,42 +164,39 @@ setup() {
 
 ```javascript
 // main.js
-import {createApp} from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 import api from './api'
 // 对象挂载，这句很重要
 app.config.globalProperties.$api = api
 
-
 // app.vue
 export default {
-    name: 'app',
-    setup() {
-        const {ctx} = getCurrentInstance()
-        const userList = ref([])
-        // 获取用户列表
-        const getUserList = async ()=> {
-            let params = { id: 1 }
-            try {
-                // 通过ctx调用接口
-                const {list,page} = await ctx.$api.getUserList(params)
-                userList.value = list
-            } catch (error) {
-
-            }
-        }
-        return {
-            getUserList
-        }
+  name: 'app',
+  setup() {
+    const { ctx } = getCurrentInstance()
+    const userList = ref([])
+    // 获取用户列表
+    const getUserList = async () => {
+      let params = { id: 1 }
+      try {
+        // 通过ctx调用接口
+        const { list, page } = await ctx.$api.getUserList(params)
+        userList.value = list
+      } catch (error) {}
     }
+    return {
+      getUserList
+    }
+  }
 }
 ```
 
 ##### f. Provider/Inject
 
-- 主要用于组件之间数据传递，如果数据复杂一般会使用Redux进行存储，如果业务简单，可以使用Provider/Inject来直接传递。Provider主要是提供数据，Inject主要用于接收数据。
+- 主要用于组件之间数据传递，如果数据复杂一般会使用 Redux 进行存储，如果业务简单，可以使用 Provider/Inject 来直接传递。Provider 主要是提供数据，Inject 主要用于接收数据。
 
-虽然Composition API是Vue3新语法，但是不推荐所有页面都使用它来开发，官方介绍的是通过它可以防止方法来回横跳，所以如果是独立模块封装或者独立组件调用，我们可以基于Composition API来开发，但是常规页面，还是Options API方便，大家千万不要误导。
+虽然 Composition API 是 Vue3 新语法，但是不推荐所有页面都使用它来开发，官方介绍的是通过它可以防止方法来回横跳，所以如果是独立模块封装或者独立组件调用，我们可以基于 Composition API 来开发，但是常规页面，还是 Options API 方便，大家千万不要误导。
 
 [summary](./images/summary.png)
 
@@ -205,17 +204,17 @@ export default {
 
 #### 2.1 初始化、目录规范
 
-##### a. 全局安装vue脚手架
+##### a. 全局安装 vue 脚手架
 
 ```javascript
 npm install @vue/cli -g
 // or
 cnpm install @vue/cli -g
 // or
-yarn global add @vue/cli 
+yarn global add @vue/cli
 ```
 
-- vue --version 可以查看版本，4.x以上可以支持创建 vue3 项目
+- vue --version 可以查看版本，4.x 以上可以支持创建 vue3 项目
 
 - 版本升级
   
@@ -239,7 +238,7 @@ yarn create @vitejs/app manager-fe
 # 安装项目生产依赖
 yarn add vue-router vuex element-plus axios -
 # 安装项目开发依赖
-yarn add sass -S 
+yarn add sass -S
 ```
 
 #### 2.2 目录结构
@@ -272,7 +271,7 @@ manager-fe
 
 #### 2.3 路由封装
 
-- 在scr目录的router目录下创建index.js文件，写入下面内容
+- 在 scr 目录的 router 目录下创建 index.js 文件，写入下面内容
 
 ```javascript
 import { createRouter, createWebHashHistory } from 'vue-router'
@@ -317,7 +316,7 @@ export default router
 
 #### 2.4 环境配置
 
-- 在src目录的config目录下创建index.js文件，写入下面内容
+- 在 src 目录的 config 目录下创建 index.js 文件，写入下面内容
 
 ```javascript
 /**
@@ -346,9 +345,9 @@ export default {
 }
 ```
 
-#### 2.5 axios的二次封装
+#### 2.5 axios 的二次封装
 
-- 在src目录下的utils目录下创建request.js文件
+- 在 src 目录下的 utils 目录下创建 request.js 文件
 
 - 实例化 axios 对象
 
@@ -364,15 +363,15 @@ const app = createApp(App)
 app.config.globalProperties.$request = request
 ```
 
-#### 2.6 storage二次封装
+#### 2.6 storage 二次封装
 
-localStorage可以存储基本数据类型，对于引用数据类型，如
+localStorage 可以存储基本数据类型，对于引用数据类型，如
 
 `localStorage.setItem("user", [{name: 'jack'}])` 存进去之后识别就是 object object
 
-**可以用 JSON.stringify来转换成字符串**
+**可以用 JSON.stringify 来转换成字符串**
 
-- 在utils目录下创建storage.js文件
+- 在 utils 目录下创建 storage.js 文件
 
 ```javascript
 /**
@@ -407,14 +406,14 @@ export default {
 #### 2.7. 主页结构布局
 
 ```javascript
-    <div class="wrapper">
-       <div class="main-page">
-          <router-view></router-view>
-        </div>
-      </div>
+<div class="wrapper">
+  <div class="main-page">
+    <router-view></router-view>
+  </div>
+</div>
 ```
 
-- 通过在router-view外设置class方法统一对各个路由子页面进行样式的设置
+- 通过在 router-view 外设置 class 方法统一对各个路由子页面进行样式的设置
 
 #### 2.8 架构师
 
@@ -434,7 +433,7 @@ export default {
 
 ##### b. 系统架构设计需要考虑哪些
 
-1. 手动构建或基于Cli构建基础项目
+1. 手动构建或基于 Cli 构建基础项目
 
 2. 提前设计好项目整体架构能力
 - 目录结构
@@ -447,20 +446,20 @@ export default {
 
 - Mock
 
-- Cookie/Storage/Axios等插件封装
+- Cookie/Storage/Axios 等插件封装
 
 - 路由封装
 
 - 系统整体布局
-3. CodeReview流程
+3. CodeReview 流程
 
-4. Git提交规范
+4. Git 提交规范
 
-5. VSCode配置规范
+5. VSCode 配置规范
 
 6. 开发独有的脚手架
 
-7. 工程化（自动构建、自动部署CI/CD）
+7. 工程化（自动构建、自动部署 CI/CD）
 
 ##### c. 业务方面需要考虑哪些
 
@@ -472,13 +471,13 @@ export default {
 
 4. 组件提取
 
-5. UI框架设计
+5. UI 框架设计
 
 6. 数据埋点设计
 
 7. 通用后台设计
 
-8. H5架构方案
+8. H5 架构方案
 
 9. 小程序架构方案
 
@@ -513,21 +512,17 @@ export default {
    
    ```javascript
    <script setup>
-   import {useRouter} from 'vue-router'
-   let router = useRouter()
-   const goHome = ()=>{
-       route.push('/login')
-   }
+     import {useRouter} from 'vue-router' let router = useRouter() const goHome = ()=>{route.push('/login')}
    </script>
    ```
 
-### 3. Koa架构设计
+### 3. Koa 架构设计
 
-#### 3.1 Koa2项目初始化操作
+#### 3.1 Koa2 项目初始化操作
 
-> 通常我们可以借助于脚手架，快速创建一个Koa2项目，当然也可以自己从头搭建；脚手架会帮助我们提前搭好基本的架子。
+> 通常我们可以借助于脚手架，快速创建一个 Koa2 项目，当然也可以自己从头搭建；脚手架会帮助我们提前搭好基本的架子。
 
-##### 3.1.1. koa-generator快速生成koa服务的脚手架工具
+##### 3.1.1. koa-generator 快速生成 koa 服务的脚手架工具
 
 a. 全局安装脚手架工具
 
@@ -543,15 +538,15 @@ b. 进入到项目文件夹目录，执行生成命令
 koa2 manager-server
 ```
 
-> 如果无法使用koa2命令，说明需要配置环境变量，window用户，需要找到koa-generator的安装目录，找到里面bin下面的koa2命令文件，然后配置到环境变量中。mac用户可直接创建软连接，指向到/usr/local/bin中，比如：ln -s /Users/Jack/.config/yarn/global/node_modules/koa-generator/bin/koa2 /usr/local/bin/koa2
+> 如果无法使用 koa2 命令，说明需要配置环境变量，window 用户，需要找到 koa-generator 的安装目录，找到里面 bin 下面的 koa2 命令文件，然后配置到环境变量中。mac 用户可直接创建软连接，指向到/usr/local/bin 中，比如：ln -s /Users/Jack/.config/yarn/global/node_modules/koa-generator/bin/koa2 /usr/local/bin/koa2
 
 c. 安装依赖
 
 ```bash
 npm install
-#or 
+#or
 cnpm install
-#or 
+#or
 yarn
 ```
 
@@ -559,7 +554,7 @@ d. 启动服务
 
 ```bash
 yarn start
-#or 
+#or
 node .bin/www
 # 默认访问网址 localhost:3000/
 ```
@@ -567,27 +562,27 @@ node .bin/www
 ##### 3.2 koa-generator 创建的 koa2 框架目录
 
 ```markdown
-|-- koa-server 
-   |-- app.js             #根入口
-   |-- package-lock.json
-   |-- package.json             #项目依赖包文件
-   |-- bin
-   |   |-- www                     #运行启动文件
-   |-- public            #公共资源
-   |   |-- images
-   |   |-- javascripts
-   |   |-- stylesheets
-   |       |-- style.css
-   |-- routes
-   |   |-- index.js      #定义了localhost:3000/之下的路由
-   |   |-- users.js      #定义了localhost:3000/users/之下的路由
-   |-- views             #视图Pug是一款HTML模板引擎，专门为 Node.js 平台开发
-       |-- error.pug
-       |-- index.pug
-       |-- layout.pug
+|-- koa-server
+|-- app.js #根入口
+|-- package-lock.json
+|-- package.json #项目依赖包文件
+|-- bin
+| |-- www #运行启动文件
+|-- public #公共资源
+| |-- images
+| |-- javascripts
+| |-- stylesheets
+| |-- style.css
+|-- routes
+| |-- index.js #定义了 localhost:3000/之下的路由
+| |-- users.js #定义了 localhost:3000/users/之下的路由
+|-- views #视图 Pug 是一款 HTML 模板引擎，专门为 Node.js 平台开发
+|-- error.pug
+|-- index.pug
+|-- layout.pug
 ```
 
-##### 3.2.1 使用pm2部署Koa项目并实现启动、关闭、自动重启
+##### 3.2.1 使用 pm2 部署 Koa 项目并实现启动、关闭、自动重启
 
 a. 全局安装
 
@@ -597,7 +592,7 @@ npm install -g pm2
 
 b. 启动项目
 
-> 进入项目目录，然后使用pm2启动项目。这里要特别注意：启动**单文件**时用（app.js是项目文件名）
+> 进入项目目录，然后使用 pm2 启动项目。这里要特别注意：启动**单文件**时用（app.js 是项目文件名）
 
 ```
 pm2 start app.js   # 启动单文件
@@ -609,7 +604,7 @@ pm2 start app.js   # 启动单文件
 pm2 start ./bin/www  # 启动koa2项目
 ```
 
-c. pm2自动重启
+c. pm2 自动重启
 
 > 把 pm2 的服务先停下，然后起来的时候带上 -watch 就可以了
 
@@ -619,7 +614,7 @@ pm2 start ./bin/www --watch
 
 d. 启动完成，可以访问了
 
-e. pm2相关命令（www是项目名字）
+e. pm2 相关命令（www 是项目名字）
 
 ```
 pm2 list           #查看所有已启动项目
@@ -629,11 +624,11 @@ pm2 stop www       #停止
 pm2 delete www     #删除
 ```
 
-#### 3.2 应用log4js进行日志规范封装
+#### 3.2 应用 log4js 进行日志规范封装
 
 ```javascript
 const logger = log4js.getLogger('cheese')
-log.level = 'error'  // 下面的等级依次递增，当设置error时候，只有error和fatal可以打印出来
+log.level = 'error' // 下面的等级依次递增，当设置error时候，只有error和fatal可以打印出来
 logger.trace('entering cheese testing')
 logger.debug('entering cheese testing')
 logger.info('entering cheese testing')
@@ -642,9 +637,11 @@ logger.error('entering cheese testing')
 logger.fatal('entering cheese testing')
 ```
 
-#### 3.3 Mongo安装配置
+#### 3.3 Mongo 安装配置
 
-方法一：使用brew，基本不需要自己配置（推荐）
+**（如果不使用 homebrew,也可以参考 intel 芯片方式安装）**
+
+方法一：使用 brew，基本不需要自己配置（推荐）
 
 ```
 brew tap mongodb/brew
@@ -701,7 +698,7 @@ mongod -version
 | log directory      | /usr/local/var/log/mongodb | /opt/homebrew/var/log/mongodb |
 | data directory     | /usr/local/var/mongodb     | /opt/homebrew/var/mongodb     |
 
-**启动/停止Mongo服务,链接数据库**
+**启动/停止 Mongo 服务,链接数据库**
 
 - 作为服务
 
@@ -790,24 +787,24 @@ mongo --port 57017
   fork=true
   ```
 
--    启动服务
+- 启动服务
   
   ```bash
   mongod --confg /Users/liqinjian/software/mongodb-macos-x86_64-4.4.13/mongo/config/mongo.confg
   ```
 
-#### 3.4 Mongo语法
+#### 3.4 Mongo 语法
 
-| SQL              | Mongo           |
-| ---------------- | --------------- |
-| 表 (Table)        | 集合 (collection) |
-| 行 (Row)          | 文档 (Document)   |
-| 列 (Col)          | 字段 (Field)      |
-| 主键 (Primary Key) | 对象ID (ObjectId) |
+| SQL              | Mongo            |
+| ---------------- | ---------------- |
+| 表 (Table)        | 集合 (collection)  |
+| 行 (Row)          | 文档 (Document)    |
+| 列 (Col)          | 字段 (Field)       |
+| 主键 (Primary Key) | 对象 ID (ObjectId) |
 
 ##### 3.4.1 数据库操作
 
-- 创建数据库： use demo 
+- 创建数据库： use demo
 
 - 查看数据库：show dbs
 
@@ -883,10 +880,10 @@ mongo --port 57017
 
 #### 5.1 登录页面后台开发
 
-- mongoose是MongoDB的上层应用插件
+- mongoose 是 MongoDB 的上层应用插件
 - 开发步骤
 
-##### a. 创建utils文件夹，并创建消息提示文件log4j.js 和 请求工具文件 utils.js
+##### a. 创建 utils 文件夹，并创建消息提示文件 log4j.js 和 请求工具文件 utils.js
 
 ```javascript
 // log4j.js
@@ -1006,7 +1003,7 @@ module.exports = {
 }
 ```
 
-##### b. 创建用户数据模型，创建models文件夹，创建userSchema.js文件
+##### b. 创建用户数据模型，创建 models 文件夹，创建 userSchema.js 文件
 
 ```javascript
 // userSchema.js
@@ -1046,7 +1043,7 @@ const userSchama = mongoose.Schema({
 module.exports = mongoose.model('users', userSchama, 'users')
 ```
 
-##### c. 创建用户请求模块的路由，创建routes文件夹，创建users.js文件，通过导入数据模型来查数据
+##### c. 创建用户请求模块的路由，创建 routes 文件夹，创建 users.js 文件，通过导入数据模型来查数据
 
 ```javascript
 // users.js
@@ -1081,7 +1078,7 @@ router.post('/login', async ctx => {
 module.exports = router
 ```
 
-##### d. 创建config文件夹，存放数据库连接配置文件db.js和index.js
+##### d. 创建 config 文件夹，存放数据库连接配置文件 db.js 和 index.js
 
 ```javascript
 // index.js
@@ -1118,18 +1115,18 @@ db.on('open', () => {
 
 #### 5.2 登录页面需要掌握的知识
 
-##### components和views区别
+##### components 和 views 区别
 
-- components通常放业务组件
-- views通常放页面（视图）
+- components 通常放业务组件
+- views 通常放页面（视图）
 
 ##### 路由创建方式
 
 ```javascript
-import { createRouter,createWebHashHistory } from  "vue-router"
+import { createRouter, createWebHashHistory } from 'vue-router'
 const router = createRouter({
-  history:createWebHashHistory(),
-  routes:[]
+  history: createWebHashHistory(),
+  routes: []
 })
 ```
 
@@ -1145,21 +1142,21 @@ const routes = [
 ]
 ```
 
-##### 怎么理解vw和vh?
+##### 怎么理解 vw 和 vh?
 
-vw和vh是css3中的新特性，是一种视口单位。在目前PC/H5中广泛使用，vw主要是可视区域宽度，vh主要是可视区域高度。通过这种视口单位可实现自适应布局。
+vw 和 vh 是 css3 中的新特性，是一种视口单位。在目前 PC/H5 中广泛使用，vw 主要是可视区域宽度，vh 主要是可视区域高度。通过这种视口单位可实现自适应布局。
 
 1vw = 1% 100vw = 屏幕可视宽度 100vh = 屏幕可视高度 calc(100vw - 50px) = 动态计算 屏幕宽度 - 50px ,注意：减号 前后必须有空格。设置后超出会出现滚动条。
 
-##### Vue3全局对象挂载
+##### Vue3 全局对象挂载
 
-在Vue2中我们一般通过原型进行挂载，比如：
+在 Vue2 中我们一般通过原型进行挂载，比如：
 
 ```javascript
-Vue.prototype.$axios = axios;
+Vue.prototype.$axios = axios
 ```
 
-Vue3中由于没有vue实例对象，因此我们需要通过另外一种方式：
+Vue3 中由于没有 vue 实例对象，因此我们需要通过另外一种方式：
 
 ```javascript
 import App from 'app.vue'
@@ -1232,16 +1229,16 @@ const routes = [
 
 - `this.$route` 可以打印出路由的所有信息
 
-#### 6.2 vite配置
+#### 6.2 vite 配置
 
-- vite中组件地址必须带后缀 .vue，而webpack不用
+- vite 中组件地址必须带后缀 .vue，而 webpack 不用
   
   ```javascript
   import('./../views/Welcome.vue')
-  import('./../views/Welcome')  // 错误
+  import('./../views/Welcome') // 错误
   ```
 
-- vite可以配置别名，解决 ./../ 的问题，类似于 Vue 中的 @
+- vite 可以配置别名，解决 ./../ 的问题，类似于 Vue 中的 @
   
   ```javascript
   resolve: {
@@ -1255,33 +1252,33 @@ const routes = [
   
   ```javascript
   css: {
-      preprocessorOptions: {
-          scss: {
-              additionalData: `@import '@/assets/style/base.scss'`
-          }
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import '@/assets/style/base.scss'`
       }
+    }
   }
   ```
 
 ### 7. JWT(JSON Web Tokens)
 
-#### 7.1 什么是JWT
+#### 7.1 什么是 JWT
 
-- JWT是一种跨域认证解决方案
+- JWT 是一种跨域认证解决方案
 
 #### 7.2 解决问题
 
 - 数据传输简单、高效
 
-- jwt会生成签名，保证传输安全
+- jwt 会生成签名，保证传输安全
 
-- jwt具有时效性
+- jwt 具有时效性
 
-- jwt更高效地利用集群做好单点登录
+- jwt 更高效地利用集群做好单点登录
 
 #### 7.3 原理
 
-- 服务器认证后，生成一个JSON对象，后续通过json进行通信
+- 服务器认证后，生成一个 JSON 对象，后续通过 json 进行通信
 
 #### 7.4 数据结构
 
@@ -1298,7 +1295,7 @@ const routes = [
   "typ": "JWT"  // 加密类型
   ```
 
-- Payload结构
+- Payload 结构
   
   ```
   iss(issure): 签发人
@@ -1307,7 +1304,7 @@ const routes = [
   aud(audience): 受众
   nbf(not before): 生效时间
   iat(issued at): 签发时间
-  jti(jwt id): 编号 
+  jti(jwt id): 编号
   
   // example
   {
@@ -1317,9 +1314,9 @@ const routes = [
   }
   ```
 
-#### 7.5 jsonwebtoken插件
+#### 7.5 jsonwebtoken 插件
 
-- 要手动去拼接header、payload、以及使用加密算法生成token需要一定步骤，而插件jsonwebtoken已经帮我们封装好，只需要传入 json，就可以生成一个token。
+- 要手动去拼接 header、payload、以及使用加密算法生成 token 需要一定步骤，而插件 jsonwebtoken 已经帮我们封装好，只需要传入 json，就可以生成一个 token。
 
 - 后端项目中
   
@@ -1357,3 +1354,43 @@ const routes = [
     }
   })
   ```
+
+#### 7.6 Token拦截
+
+- 首先在server目录下安装 koa-jwt 中间件
+
+```javascript
+// server项目下的 app.js
+// 对所有请求的接口做一个拦截
+// logger
+app.use(async (ctx, next) => {
+  // const start = new Date()
+  // await next()
+  // const ms = new Date() - start
+  // console.log(`${ctx.method} ${ctx.url} - ${ms}ms-----ssssssssssssssssssss`)
+  // log4js.info(`===========log output==========`)
+  log4js.info(`get params: ${JSON.stringify(ctx.request.query)}`)
+  log4js.info(`post params: ${JSON.stringify(ctx.request.body)}`)
+  await next().catch(err => {
+    if (err.status == '401') {
+      ctx.status = 200
+      ctx.body = utils.fail('Token认证失败', utils.CODE)
+    } else {
+      throw err
+    }
+  })
+})
+// 使用koa-jwt
+app.use(koajwt({ secret: 'imooc' })) // 任何一个接口进来都会经过这里过滤，校验token是否有效
+```
+
+> 但是需要过滤掉登录和注册接口，不要让它们因为token而被拦截
+
+```javascript
+app.use(
+  koajwt({ secret: 'imooc' }).unless({
+    path: [/^\/api\/users\/login/]
+    path: [/^\/api\/users\/login/]  // 这种也可
+  })
+) // 任何一个接口进来都会经过这里过滤，校验token是否有效
+```

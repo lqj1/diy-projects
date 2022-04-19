@@ -7,7 +7,7 @@ const User = require('./../models/userSchama')
 const util = require('./../utils/utils')
 const jwt = require('jsonwebtoken')
 router.prefix('/users')
-// // 路由,前端请求/leave/count
+// // // 路由,前端请求/leave/count
 // router.get('/leave/count', ctx => {
 //   const token = ctx.request.headers.authorization.split(' ')[1]
 //   const payload = jwt.verify(token, 'imooc')
@@ -24,12 +24,13 @@ router.post('/login', async ctx => {
       userPwd
     })
     const data = res._doc
+    console.log('data=>', data)
     const token = jwt.sign(
       {
         data: data
       },
-      'lqj',
-      { expiresIn: 3000 }
+      'imooc',
+      { expiresIn: 30 }
     ) // 密钥 lqj, 过期时间 30s
     if (res) {
       data.token = token
