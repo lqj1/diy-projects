@@ -1286,7 +1286,7 @@ const routes = [
 
 - JWT TOKEN
   
-  - Header.Payload.Sigature 组成
+  - Header.Payload.Sigatu``re 组成
 
 - Header 结构
   
@@ -1394,3 +1394,120 @@ app.use(
   })
 ) // 任何一个接口进来都会经过这里过滤，校验token是否有效
 ```
+
+请求 /login 接口后端代码为：
+
+```javascript
+// 路由,前端请求/login
+router.post('/login', async ctx => {
+  try {
+    // 通过ctx可以得到请求参数,get通过query,post通过body
+    const { userName, userPwd } = ctx.request.body
+    // 返回的是promise
+    /**
+     * 返回数据库指定的字段有三种方式
+     * 1. 字符串加空格 'userId userName userEmail state role deptId roleList'
+     * 2. json，1返回;0/默认 不返回 {userId: 1, userPwd: 0}
+     * 3. sql方式，select ('userId')
+     */
+    // 从后端数据库查找账号密码并判断
+    const res = await User.findOne(
+      {
+        userName, // key-value的简写
+        userPwd
+      },
+      'userId userName userEmail state role deptId roleList'
+    )
+    const data = res._doc
+    console.log('data=>', data)
+    // jwt 加密
+    const token = jwt.sign(
+      {
+        data: data
+      },
+      'imooc',
+      { expiresIn: 30 }
+    ) // 密钥 imooc, 过期时间 30s
+    if (res) {
+      data.token = token
+      ctx.body = util.success(res)
+    } else {
+      ctx.body = util.fail('账号密码不正确')
+    }
+  } catch (error) {
+    ctx.body = util.fail(error.msg)
+  }
+})
+```
+
+#### 7.7 传统登录做法是如何记住用户身份信息
+
+登录看似一个简单的功能，实际上随着业务的增多、公司规模扩大，对登录的要求会越来越高。过去在JSP/ASP/PHP时代，可能服务端写个session就搞定了，前端一个登录接口即可。**但现在考虑到单点登录、身份加密、OAuth授权。**
+
+###### SessionID
+
+http本身是无状态的，服务端和前端通信是互相不认识的，为了能够记住每个访问的用户身份，引入了Session概念，它是一张服务端缓存技术。当用户访问服务端时，服务端会生成一个Sessionld作为唯一标识保存在内存中，并写入用户浏览器cookie中，当用户下次访问时，会携带这个cookie，服务端根据Sessionld来判断用户身份。
+
+###### Cookie
+
+Cookie是前端浏览器的特性，跟Session有相似之处，但一般我们都不用Sessionld作为唯一身份。当用户登录以后，**服务端会返回一个userld作为用户唯一值**，前端获取到登录信息后，可自行写入Cookie或者由服务端写入Cookie，下次访问页面时，可判断Cookie信息来识别用户身份，但是这种Cookie方式不安全。
+
+###### JWT
+
+JWT是一种综合技术方案，即能保证安全，又能使用简单，同时具有时效性，目前也是主流的技术方案。具体用法可参考本周总结部分。
+
+###### OAuth
+
+OAuth本身是一种单点登录协议，当公司体量大了以后，会存在很多业务系统，但是不可能每套系统都做一遍登录功能，因此可通过OAuth
+做登录授权，一次登录即可访问全战系统，最有名的当属微信的授权登录。大家访问公众号的时候，如果想要获取用户头像等信息就需要做
+微信登录授权，就是基于OAuth协议。
+
+#### 7.8 JWT 总结
+
+- 什么是 JWT?
+  
+  - JWT 是一种跨域认证解决方案
+
+- 解决问题
+  
+  - 数据传输简单、高效
+  
+  - 会生成签名，保证传输安全
+  
+  - 更具有时效性
+  
+  - 更高效利用集群做好单点登录
+
+- <mark>原理</mark>
+  
+  - **服务器认证后，生成一个JSON对象，后续通过json进行通信**
+
+- 数据结构
+  
+  - Header 头部
+  
+  - Payload 负载
+  
+  - Signature 签名
+  
+  <img src="./images/jwt.png" title="" alt="jwt" width="539">
+
+- header结构
+  
+  ![header](./images/jwt-header.png)
+
+- payload结构
+  
+  ![payload](./images/jwt-payload.png)
+
+- 签名：
+  
+  - HMACSHA256(base64UrlEncode(header) + “."+base64UrlEncode(payload),secret)
+
+- 使用
+  
+  - /api?token=xxx
+  
+  - cookie写入token
+  
+  - storage写入token，请求头添加：Authorization: Bearer

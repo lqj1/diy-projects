@@ -16,14 +16,16 @@ export default {
     return request({
       url: '/leave/count',
       method: 'get',
-      data: {}
+      data: {},
+      mock: true
     })
   },
   getMunuList() {
     return request({
       url: '/menu/list',
       method: 'get',
-      data: {}
+      data: {},
+      mock: true
     })
   }
 }

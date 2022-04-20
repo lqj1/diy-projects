@@ -74,8 +74,8 @@ export default {
   computed: {
   },
   mounted () {
-    // this.getNoticeCount()
-    // this.getMunuList()
+    this.getNoticeCount()
+    this.getMunuList()
   },
   methods: {
     toggle () {
